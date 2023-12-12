@@ -1,10 +1,31 @@
 import sys
 from enum import Enum
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw, ImageFont
 from tkinter import Tk, Canvas
+from random import random
+from math import cos, sin, pi
 
 
-DOT_WIDTH = 5
+DOT_WIDTH = 10
+FONT_SIZE = 20
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+
+def get_opposite_color(color: tuple[int, int, int]) -> tuple[int, int, int]:
+    return (255 - color[0], 255 - color[1], 255 - color[2])
+
+def rgb_to_hex_string(color: tuple[int, int, int]) -> str:
+    r = hex(color[0])[2:]
+    g = hex(color[1])[2:]
+    b = hex(color[2])[2:]
+    return f"#{r}{g}{b}"
+
+def random_point_on_circle(center: tuple[float, float], radius: float) -> tuple[int, int]:
+    angle = random() * 2 * pi
+    x = center[0] + radius * cos(angle)
+    y = center[1] + radius * sin(angle)
+    return (x, y)
 
 
 class AppMode(Enum):
@@ -30,6 +51,7 @@ class App:
             im = im.resize((self.W, self.H))
             self.filename = f"dotwork.{filename}"
             im.save(self.filename)
+            self.img = im
 
         self.points = []
         self.selected = set()
@@ -43,11 +65,12 @@ class App:
         self.root.bind("<Escape>", self.toggle_del_mode)
         self.root.bind("<KeyPress-i>", self.toggle_image)
         self.root.bind("<KeyPress-n>", self.toggle_labels)
+        self.root.bind("<KeyPress-s>", self.save_image)
 
         self.canvas = Canvas(self.root, width=self.W, height=self.H)
         self.canvas.pack()
-        self.img = ImageTk.PhotoImage(file=self.filename)
-        self.canvas.create_image(self.W / 2, self.H / 2, image=self.img, tag="bg_img")
+        self.tk_img = ImageTk.PhotoImage(file=self.filename)
+        self.canvas.create_image(self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img")
         self.status_bg_img = True
     
     def run(self):
@@ -65,17 +88,17 @@ class App:
         else:
             self.mode = AppMode.DEL
     
-    def create_dot(self, x: float, y: float, tag: str, color="black"):
-        self.canvas.create_oval(x, y, x + DOT_WIDTH, y + DOT_WIDTH, width=DOT_WIDTH, outline=color, tag=tag)
+    def create_dot(self, x: float, y: float, tag: str, color=BLACK):
+        self.canvas.create_oval(x, y, x + DOT_WIDTH, y + DOT_WIDTH, fill=rgb_to_hex_string(color), tag=tag)
 
-    def create_label(self, x: float, y: float, i: int):
+    def create_label(self, x: float, y: float, i: int, color=BLACK):
         tag = ("label", f"label-{i}")
-        self.canvas.create_text(x + DOT_WIDTH / 2, y - 2 * DOT_WIDTH, text=f"{i}", fill="black", tag=tag)
+        self.canvas.create_text(x + DOT_WIDTH / 2, y - 2 * DOT_WIDTH, text=f"{i}", fill=rgb_to_hex_string(color), tag=tag)
 
-    def create_label_with_check(self, x: float, y: float, i: int):
+    def create_label_with_check(self, x: float, y: float, i: int, color=BLACK):
         if self.status_labels:
             tag = ("label", f"label-{i}")
-            self.canvas.create_text(x + DOT_WIDTH / 2, y - 2 * DOT_WIDTH, text=f"{i}", fill="black", tag=tag)
+            self.canvas.create_text(x + DOT_WIDTH / 2, y - 2 * DOT_WIDTH, text=f"{i}", fill=rgb_to_hex_string(color), tag=tag)
 
     def show_labels(self):
         self.canvas.delete("label")
@@ -86,7 +109,7 @@ class App:
         if self.status_bg_img:
             self.canvas.delete("bg_img")
         else:
-            self.canvas.create_image(self.W / 2, self.H / 2, image=self.img, tag="bg_img")
+            self.canvas.create_image(self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img")
             # Dégeu mais l'image repasse au premier plan
             # On delete et redraw tous les points
             self.canvas.delete("label")
@@ -112,6 +135,16 @@ class App:
         else:
             self.create_dot(x, y, tag, "red")
             self.selected.add(i)
+
+    def save_image(self, event):
+        im = Image.new(mode="RGB", size=(self.W, self.H), color=WHITE)
+        draw = ImageDraw.Draw(im)
+        font = ImageFont.truetype(r"arial.ttf", FONT_SIZE)
+        # Draw points
+        for (i, (x, y, _)) in enumerate(self.points):
+            draw.ellipse((x, y, x + DOT_WIDTH, y + DOT_WIDTH), fill=BLACK, outline=BLACK)
+            draw.text(random_point_on_circle((x, y), FONT_SIZE), str(i + 1), fill=BLACK, font=font)
+        im.save(f"connect-the-dots-{self.filename}")
 
     def handle_dot(self, event):
         (x, y) = (event.x, event.y)
