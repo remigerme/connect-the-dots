@@ -119,11 +119,7 @@ class App:
             self.canvas.delete("bg_img")
         else:
             self.canvas.create_image(self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img")
-            # Dégeu mais l'image repasse au premier plan
-            # On delete et redraw tous les points
-            for (i, (x, y, tag)) in enumerate(self.points):
-                self.canvas.delete(tag)
-                self.create_dot(x, y, tag)
+            self.redraw_dots()
         self.status_bg_img = not self.status_bg_img
     
     @update_labels
@@ -187,14 +183,11 @@ class App:
                 d_min = d(x_, y_)
         return n
 
+    @update_labels
     def remove_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
         (_, _, tag) = self.points.pop(n)
         self.canvas.delete(tag)
-        label_tag = f"label-{n + 1}"
-        self.canvas.delete(label_tag)
-        if self.status_labels:
-            self.show_labels()
     
     @update_labels
     def renumber(self, event):
