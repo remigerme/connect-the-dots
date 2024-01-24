@@ -1,7 +1,7 @@
 import sys
 from enum import Enum
 from PIL import Image, ImageTk, ImageDraw, ImageFont
-from tkinter import Tk, Canvas
+from tkinter import Tk, Canvas, Entry, Toplevel, simpledialog
 from random import random
 from math import cos, sin, pi
 
@@ -9,6 +9,9 @@ from math import cos, sin, pi
 DOT_WIDTH = 10
 FONT_SIZE = 20
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
 
@@ -16,10 +19,7 @@ def get_opposite_color(color: tuple[int, int, int]) -> tuple[int, int, int]:
     return (255 - color[0], 255 - color[1], 255 - color[2])
 
 def rgb_to_hex_string(color: tuple[int, int, int]) -> str:
-    r = hex(color[0])[2:]
-    g = hex(color[1])[2:]
-    b = hex(color[2])[2:]
-    return f"#{r}{g}{b}"
+    return f"#{color[0]:02X}{color[1]:02X}{color[2]:02X}"
 
 def random_point_on_circle(center: tuple[float, float], radius: float) -> tuple[int, int]:
     angle = random() * 2 * pi
@@ -42,8 +42,8 @@ class App:
             sw = self.root.winfo_screenwidth()
             sh = self.root.winfo_screenheight()
             f = min(sw / W, sh / H)
-            self.W = int(0.9 * f * W)
-            self.H = int(0.9 * f * H)
+            self.W = int(0.8 * f * W)
+            self.H = int(0.8 * f * H)
 
         with Image.open(filename) as im:
             (W, H) = im.size
@@ -66,6 +66,7 @@ class App:
         self.root.bind("<KeyPress-i>", self.toggle_image)
         self.root.bind("<KeyPress-n>", self.toggle_labels)
         self.root.bind("<KeyPress-s>", self.save_image)
+        self.root.bind("<KeyPress-r>", self.renumber)
 
         self.canvas = Canvas(self.root, width=self.W, height=self.H)
         self.canvas.pack()
@@ -105,6 +106,16 @@ class App:
         for (i, (x, y, _)) in enumerate(self.points):
             self.create_label(x, y, i + 1)
 
+    def clear_dots(self):
+        for (_, _, tag) in self.points:
+            self.canvas.delete(tag)
+    
+    def redraw_dots(self):
+        self.clear_dots() # do it first to avoid concurrential changes
+        for (i, (x, y, _)) in enumerate(self.points):
+            color = BLUE if i in self.selected else BLACK
+            self.create_dot(x, y, f"dot-{i}", color)
+
     def toggle_image(self, event):
         if self.status_bg_img:
             self.canvas.delete("bg_img")
@@ -133,7 +144,7 @@ class App:
             self.create_dot(x, y, tag)
             self.selected.remove(i)
         else:
-            self.create_dot(x, y, tag, "red")
+            self.create_dot(x, y, tag, RED)
             self.selected.add(i)
 
     def save_image(self, event):
@@ -191,7 +202,20 @@ class App:
         self.canvas.delete(label_tag)
         if self.status_labels:
             self.show_labels()
-
+    
+    def renumber(self, event):
+        if len(self.selected) == 0:
+            raise Exception("Select a point to renumber.")
+        if len(self.selected) >= 2:
+            raise Exception("Can't renumber multiple points at once.")
+        n = list(self.selected)[0]
+        new_n = simpledialog.askinteger("Renumérotation", "Nouveau numéro : ")
+        if new_n is not None and 1 <= new_n <= len(self.points):
+            self.selected.remove(n)
+            self.points.insert(new_n - 1, self.points.pop(n))
+            self.redraw_dots()
+            if self.status_labels:
+                self.show_labels()
 
 def main():
     args = sys.argv[1:]
