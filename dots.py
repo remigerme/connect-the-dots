@@ -5,6 +5,7 @@ from tkinter import Tk, Canvas, Label, simpledialog
 from random import random
 from math import cos, sin, pi
 
+RGBColor = tuple[int, int, int]
 
 DOT_WIDTH = 10
 FONT_SIZE = 20
@@ -25,10 +26,17 @@ MODE_LABEL_INFO = {
     AppMode.DEL: ("Mode actuel : suppression de points", RED)
 }
 
-def get_opposite_color(color: tuple[int, int, int]) -> tuple[int, int, int]:
+def update_mode_label(func):
+    def wrapper(self, *args, **kwargs):
+        result = func(*args, **kwargs)
+        self.apply_update_mode_label()
+        return result
+    return wrapper
+
+def get_opposite_color(color: RGBColor) -> RGBColor:
     return (255 - color[0], 255 - color[1], 255 - color[2])
 
-def rgb_to_hex_string(color: tuple[int, int, int]) -> str:
+def rgb_to_hex_string(color: RGBColor) -> str:
     return f"#{color[0]:02X}{color[1]:02X}{color[2]:02X}"
 
 def random_point_on_circle(center: tuple[float, float], radius: float) -> tuple[int, int]:
@@ -86,26 +94,19 @@ class App:
     def run(self):
         self.root.mainloop()
 
-    def update_mode_label(self):
-        (text, rgb_color) = MODE_LABEL_INFO[self.mode]
-        self.mode_label.config(
-            text = text,
-            bg = rgb_to_hex_string(rgb_color)
-        )
-
+    @update_mode_label
     def toggle_edit_mode(self, event):
         if self.mode == AppMode.EDIT:
             self.mode = AppMode.ADD
         else:
             self.mode = AppMode.EDIT
-        self.update_mode_label()
     
+    @update_mode_label
     def toggle_del_mode(self, event):
         if self.mode == AppMode.DEL:
             self.mode = AppMode.ADD
         else:
             self.mode = AppMode.DEL
-        self.update_mode_label()
     
     def create_dot(self, x: float, y: float, tag: str, color=BLACK):
         self.canvas.create_oval(x, y, x + DOT_WIDTH, y + DOT_WIDTH, fill=rgb_to_hex_string(color), tag=tag)
@@ -234,6 +235,13 @@ class App:
             self.redraw_dots()
             if self.status_labels:
                 self.show_labels()
+
+    def apply_update_mode_label(self):
+        (text, rgb_color) = MODE_LABEL_INFO[self.mode]
+        self.mode_label.config(
+            text = text,
+            bg = rgb_to_hex_string(rgb_color)
+        )
 
 def main():
     args = sys.argv[1:]
