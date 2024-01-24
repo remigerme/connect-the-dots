@@ -3,7 +3,7 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 from tkinter import Tk, Canvas, Label, simpledialog
 
 from constants import *
-from utils import rgb_to_hex_string, random_point_on_circle
+from utils import rgb_to_hex_string, place_label
 
 # Decorators used to update various things
 
@@ -142,7 +142,11 @@ class App:
         # Draw points
         for (i, (x, y, _)) in enumerate(self.points):
             draw.ellipse((x, y, x + DOT_WIDTH, y + DOT_WIDTH), fill=BLACK, outline=BLACK)
-            draw.text(random_point_on_circle((x, y), FONT_SIZE), str(i + 1), fill=BLACK, font=font)
+            draw.text(
+                place_label(self.points[(i - 1) % len(self.points)], (x, y), self.points[(i + 1) % len(self.points)], RADIUS_LABEL),
+                str(i + 1),
+                fill=BLACK,
+                font=font)
         im.save(f"connect-the-dots-{self.filename}")
 
     def handle_dot(self, event):
