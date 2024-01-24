@@ -108,9 +108,9 @@ class App:
     
     def redraw_dots(self):
         self.clear_dots() # do it first to avoid concurrential changes
-        for (i, (x, y, _)) in enumerate(self.points):
+        for (i, (x, y, tag)) in enumerate(self.points):
             color = BLUE if i in self.selected else BLACK
-            self.create_dot(x, y, f"dot-{i}", color)
+            self.create_dot(x, y, tag, color)
 
     @update_labels
     def toggle_image(self, event):
@@ -185,8 +185,10 @@ class App:
     @update_labels
     def remove_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
-        (_, _, tag) = self.points.pop(n)
-        self.canvas.delete(tag)
+        (x_, y_, _) = self.points[n]
+        if (x - x_) ** 2 + (y - y_) ** 2 < (4 * DOT_WIDTH) ** 2:
+            (_, _, tag) = self.points.pop(n)
+            self.canvas.delete(tag)
     
     @update_labels
     def renumber(self, event):
