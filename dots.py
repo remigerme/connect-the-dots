@@ -91,12 +91,11 @@ class App:
 
     def create_label(self, x: float, y: float, i: int, color=BLACK):
         tag = ("label", f"label-{i}")
-        self.canvas.create_text(x + DOT_WIDTH / 2, y - 2 * DOT_WIDTH, text=f"{i}", fill=rgb_to_hex_string(color), tag=tag)
+        self.canvas.create_text(x + DOT_WIDTH / 2, y - DOT_WIDTH, text=f"{i}", fill=rgb_to_hex_string(color), tag=tag)
 
     def create_label_with_check(self, x: float, y: float, i: int, color=BLACK):
         if self.status_labels:
-            tag = ("label", f"label-{i}")
-            self.canvas.create_text(x + DOT_WIDTH / 2, y - 2 * DOT_WIDTH, text=f"{i}", fill=rgb_to_hex_string(color), tag=tag)
+            self.create_label(x, y, i, color)
 
     def show_labels(self):
         self.canvas.delete("label")
