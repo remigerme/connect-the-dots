@@ -26,10 +26,19 @@ MODE_LABEL_INFO = {
     AppMode.DEL: ("Mode actuel : suppression de points", RED)
 }
 
+# Decorators used to update various things
+
 def update_mode_label(func):
     def wrapper(self, *args, **kwargs):
-        result = func(*args, **kwargs)
+        result = func(self, *args, **kwargs)
         self.apply_update_mode_label()
+        return result
+    return wrapper
+
+def update_labels(func):
+    def wrapper(self, *args, **kwargs):
+        result = func(self, *args, **kwargs)
+        self.apply_update_labels()
         return result
     return wrapper
 
@@ -46,6 +55,8 @@ def random_point_on_circle(center: tuple[float, float], radius: float) -> tuple[
     return (x, y)
 
 class App:
+
+    @update_mode_label
     def __init__(self, filename):
         self.root = Tk()
     
@@ -82,7 +93,6 @@ class App:
         # Mode bar info
         self.mode_label = Label(self.root)
         self.mode_label.pack()
-        self.update_mode_label()
 
         # Canvas
         self.canvas = Canvas(self.root, width=self.W, height=self.H)
@@ -135,6 +145,7 @@ class App:
             color = BLUE if i in self.selected else BLACK
             self.create_dot(x, y, f"dot-{i}", color)
 
+    @update_labels
     def toggle_image(self, event):
         if self.status_bg_img:
             self.canvas.delete("bg_img")
@@ -142,18 +153,13 @@ class App:
             self.canvas.create_image(self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img")
             # Dégeu mais l'image repasse au premier plan
             # On delete et redraw tous les points
-            self.canvas.delete("label")
             for (i, (x, y, tag)) in enumerate(self.points):
                 self.canvas.delete(tag)
                 self.create_dot(x, y, tag)
-                self.create_label_with_check(x, y, i + 1)
         self.status_bg_img = not self.status_bg_img
     
+    @update_labels
     def toggle_labels(self, event):
-        if self.status_labels:
-            self.canvas.delete("label")
-        else:
-            self.show_labels()
         self.status_labels = not self.status_labels
     
     def toggle_select(self, i: int):
@@ -222,6 +228,7 @@ class App:
         if self.status_labels:
             self.show_labels()
     
+    @update_labels
     def renumber(self, event):
         if len(self.selected) == 0:
             raise Exception("Select a point to renumber.")
@@ -233,8 +240,6 @@ class App:
             self.selected.remove(n)
             self.points.insert(new_n - 1, self.points.pop(n))
             self.redraw_dots()
-            if self.status_labels:
-                self.show_labels()
 
     def apply_update_mode_label(self):
         (text, rgb_color) = MODE_LABEL_INFO[self.mode]
@@ -242,6 +247,11 @@ class App:
             text = text,
             bg = rgb_to_hex_string(rgb_color)
         )
+    
+    def apply_update_labels(self):
+        self.canvas.delete("label")
+        if self.status_labels:
+            self.show_labels()
 
 def main():
     args = sys.argv[1:]
