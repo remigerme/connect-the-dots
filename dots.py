@@ -1,7 +1,7 @@
 import sys
 from enum import Enum
 from PIL import Image, ImageTk, ImageDraw, ImageFont
-from tkinter import Tk, Canvas, Entry, Toplevel, simpledialog
+from tkinter import Tk, Canvas, Label, simpledialog
 from random import random
 from math import cos, sin, pi
 
@@ -14,6 +14,16 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
+class AppMode(Enum):
+    ADD = 1
+    EDIT = 2
+    DEL = 3
+
+MODE_LABEL_INFO = {
+    AppMode.ADD: ("Mode actuel : ajout de points", GREEN),
+    AppMode.EDIT: ("Mode actuel : sélection de points", BLUE),
+    AppMode.DEL: ("Mode actuel : suppression de points", RED)
+}
 
 def get_opposite_color(color: tuple[int, int, int]) -> tuple[int, int, int]:
     return (255 - color[0], 255 - color[1], 255 - color[2])
@@ -26,13 +36,6 @@ def random_point_on_circle(center: tuple[float, float], radius: float) -> tuple[
     x = center[0] + radius * cos(angle)
     y = center[1] + radius * sin(angle)
     return (x, y)
-
-
-class AppMode(Enum):
-    ADD = 1
-    EDIT = 2
-    DEL = 3
-
 
 class App:
     def __init__(self, filename):
@@ -68,6 +71,12 @@ class App:
         self.root.bind("<KeyPress-s>", self.save_image)
         self.root.bind("<KeyPress-r>", self.renumber)
 
+        # Mode bar info
+        self.mode_label = Label(self.root)
+        self.mode_label.pack()
+        self.update_mode_label()
+
+        # Canvas
         self.canvas = Canvas(self.root, width=self.W, height=self.H)
         self.canvas.pack()
         self.tk_img = ImageTk.PhotoImage(file=self.filename)
@@ -77,17 +86,26 @@ class App:
     def run(self):
         self.root.mainloop()
 
+    def update_mode_label(self):
+        (text, rgb_color) = MODE_LABEL_INFO[self.mode]
+        self.mode_label.config(
+            text = text,
+            bg = rgb_to_hex_string(rgb_color)
+        )
+
     def toggle_edit_mode(self, event):
         if self.mode == AppMode.EDIT:
             self.mode = AppMode.ADD
         else:
             self.mode = AppMode.EDIT
+        self.update_mode_label()
     
     def toggle_del_mode(self, event):
         if self.mode == AppMode.DEL:
             self.mode = AppMode.ADD
         else:
             self.mode = AppMode.DEL
+        self.update_mode_label()
     
     def create_dot(self, x: float, y: float, tag: str, color=BLACK):
         self.canvas.create_oval(x, y, x + DOT_WIDTH, y + DOT_WIDTH, fill=rgb_to_hex_string(color), tag=tag)
@@ -144,7 +162,7 @@ class App:
             self.create_dot(x, y, tag)
             self.selected.remove(i)
         else:
-            self.create_dot(x, y, tag, RED)
+            self.create_dot(x, y, tag, BLUE)
             self.selected.add(i)
 
     def save_image(self, event):
