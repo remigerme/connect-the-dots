@@ -1,30 +1,10 @@
 import sys
-from enum import Enum
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 from tkinter import Tk, Canvas, Label, simpledialog
 from random import random
 from math import cos, sin, pi
 
-RGBColor = tuple[int, int, int]
-
-DOT_WIDTH = 10
-FONT_SIZE = 20
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-WHITE = (255, 255, 255)
-
-class AppMode(Enum):
-    ADD = 1
-    EDIT = 2
-    DEL = 3
-
-MODE_LABEL_INFO = {
-    AppMode.ADD: ("Mode actuel : ajout de points", GREEN),
-    AppMode.EDIT: ("Mode actuel : sélection de points", BLUE),
-    AppMode.DEL: ("Mode actuel : suppression de points", RED)
-}
+from constants import *
 
 # Decorators used to update various things
 
