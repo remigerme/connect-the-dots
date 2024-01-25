@@ -153,7 +153,7 @@ class App:
             draw.ellipse((x, y, x + DOT_WIDTH, y + DOT_WIDTH), fill=BLACK, outline=BLACK)
             draw.text(
                 place_label(self.points[(i - 1) % len(self.points)][0:2],
-                            (x, y),
+                            (x + DOT_WIDTH / 2, y + DOT_WIDTH / 2),
                             self.points[(i + 1) % len(self.points)][0:2],
                             RADIUS_LABEL_PIL),
                 str(i + 1),
