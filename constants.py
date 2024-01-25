@@ -1,5 +1,15 @@
 from enum import Enum
 
+HELP = [
+    "On note A/D pour activer / désactiver :",
+    "<espace> pour A/D mode sélection",
+    "<r> pour renuméroter un point sélectionné",
+    "<esc> pour A/D mode suppression",
+    "<i> pour A/D l'image d'arrière-plan",
+    "<n> pour A/D les labels des points",
+    "<s> pour enregistrer l'image des points à relier générée"
+]
+
 RGBColor = tuple[int, int, int]
 
 DOT_WIDTH = 8
