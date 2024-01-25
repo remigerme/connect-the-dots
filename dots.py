@@ -49,15 +49,6 @@ class App:
         self.mode = AppMode.ADD
         self.i_tag = 0
 
-        #Bindings 
-        self.root.bind("<Button-1>", self.handle_dot)
-        self.root.bind("<space>", self.toggle_edit_mode)
-        self.root.bind("<Escape>", self.toggle_del_mode)
-        self.root.bind("<KeyPress-i>", self.toggle_image)
-        self.root.bind("<KeyPress-n>", self.toggle_labels)
-        self.root.bind("<KeyPress-s>", self.save_image)
-        self.root.bind("<KeyPress-r>", self.renumber)
-
         # Help panel
         self.help_button = Button(self.root, text="Aide", command=self.show_help_window)
         self.help_button.grid(row=0, column=1)
@@ -72,6 +63,15 @@ class App:
         self.tk_img = ImageTk.PhotoImage(file=self.filename)
         self.canvas.create_image(self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img")
         self.status_bg_img = True
+
+        #Bindings 
+        self.canvas.bind("<Button-1>", self.handle_dot)
+        self.root.bind("<space>", self.toggle_edit_mode)
+        self.root.bind("<Escape>", self.toggle_del_mode)
+        self.root.bind("<KeyPress-i>", self.toggle_image)
+        self.root.bind("<KeyPress-n>", self.toggle_labels)
+        self.root.bind("<KeyPress-s>", self.save_image)
+        self.root.bind("<KeyPress-r>", self.renumber)
     
     def run(self):
         self.root.mainloop()
@@ -171,9 +171,7 @@ class App:
     def handle_dot(self, event):
         (x, y) = (event.x, event.y)
         if y < MARGIN_UP_WINDOW:
-            print("Handled")
             return
-        print(f"{y}")
         if self.mode == AppMode.ADD:
             self.add_dot(x, y)
         elif self.mode == AppMode.DEL:
