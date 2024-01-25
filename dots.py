@@ -1,6 +1,6 @@
 import sys
 from PIL import Image, ImageTk, ImageDraw, ImageFont
-from tkinter import Tk, Canvas, Label, simpledialog
+from tkinter import Tk, Canvas, Label, Button, simpledialog
 
 from constants import *
 from utils import rgb_to_hex_string, place_label
@@ -58,19 +58,26 @@ class App:
         self.root.bind("<KeyPress-s>", self.save_image)
         self.root.bind("<KeyPress-r>", self.renumber)
 
+        # Help panel
+        self.help_button = Button(self.root, text="Aide", command=self.show_help_window)
+        self.help_button.grid(row=0, column=1)
+
         # Mode bar info
         self.mode_label = Label(self.root)
-        self.mode_label.pack()
+        self.mode_label.grid(row=0, column=0)
 
         # Canvas
         self.canvas = Canvas(self.root, width=self.W, height=self.H)
-        self.canvas.pack()
+        self.canvas.grid(columnspan=2)
         self.tk_img = ImageTk.PhotoImage(file=self.filename)
         self.canvas.create_image(self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img")
         self.status_bg_img = True
     
     def run(self):
         self.root.mainloop()
+
+    def show_help_window(self):
+        pass
 
     @update_mode_label
     def toggle_edit_mode(self, event):
@@ -163,8 +170,10 @@ class App:
 
     def handle_dot(self, event):
         (x, y) = (event.x, event.y)
-        if y < 10:
+        if y < MARGIN_UP_WINDOW:
+            print("Handled")
             return
+        print(f"{y}")
         if self.mode == AppMode.ADD:
             self.add_dot(x, y)
         elif self.mode == AppMode.DEL:
