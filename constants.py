@@ -3,6 +3,7 @@ from enum import Enum
 RGBColor = tuple[int, int, int]
 
 DOT_WIDTH = 10
+FONT_SIZE = 20
 RADIUS_LABEL = 25
 BLACK: RGBColor = (0, 0, 0)
 RED: RGBColor = (255, 0, 0)
