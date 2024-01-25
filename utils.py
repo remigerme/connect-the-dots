@@ -21,7 +21,7 @@ def place_label(
         b: Point,
         c: Point,
         radius: float) -> Point:
-    epsilon = 1e-5
+    epsilon = 1e-5 # magic trick to handle first and colinear points
     ab = add(b, mul(a, -1))
     ab = mul(ab, 1 / (norm(ab) + epsilon))
     cb = add(b, mul(c, -1))
