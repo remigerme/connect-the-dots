@@ -1,6 +1,6 @@
 import sys
 from PIL import Image, ImageTk, ImageDraw, ImageFont
-from tkinter import Tk, Canvas, Label, Button, simpledialog
+from tkinter import Tk, Canvas, Label, Button, Toplevel, simpledialog
 
 from constants import *
 from utils import rgb_to_hex_string, place_label
@@ -77,7 +77,10 @@ class App:
         self.root.mainloop()
 
     def show_help_window(self):
-        pass
+        top = Toplevel()
+        top.title("Aide")
+        for h in HELP:
+            Label(top, text=h, padx=30, pady=10).pack()
 
     @update_mode_label
     def toggle_edit_mode(self, event):
