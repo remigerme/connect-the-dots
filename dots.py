@@ -89,18 +89,24 @@ class App:
     def create_dot(self, x: float, y: float, tag: str, color=BLACK):
         self.canvas.create_oval(x, y, x + DOT_WIDTH, y + DOT_WIDTH, fill=rgb_to_hex_string(color), tag=tag)
 
-    def create_label(self, x: float, y: float, i: int, color=BLACK):
-        tag = ("label", f"label-{i}")
-        self.canvas.create_text(x + DOT_WIDTH / 2, y - DOT_WIDTH, text=f"{i}", fill=rgb_to_hex_string(color), tag=tag)
+    def create_label(self, i: int, color=BLACK):
+        n = len(self.points)
+        (x, y) = place_label(
+            self.points[(i - 1) % n][0:2],
+            self.points[i][0:2],
+            self.points[(i + 1) % n][0:2],
+            RADIUS_LABEL
+        )
+        self.draw_label(x, y, i + 1, color)
 
-    def create_label_with_check(self, x: float, y: float, i: int, color=BLACK):
-        if self.status_labels:
-            self.create_label(x, y, i, color)
+    def draw_label(self, x: float, y: float, i: int, color=BLACK):
+        tag = ("label", f"label-{i}")
+        self.canvas.create_text(x, y, text=f"{i}", fill=rgb_to_hex_string(color), tag=tag)
 
     def show_labels(self):
         self.canvas.delete("label")
-        for (i, (x, y, _)) in enumerate(self.points):
-            self.create_label(x, y, i + 1)
+        for i in range(len(self.points)):
+            self.create_label(i)
 
     def clear_dots(self):
         for (_, _, tag) in self.points:
@@ -143,7 +149,10 @@ class App:
         for (i, (x, y, _)) in enumerate(self.points):
             draw.ellipse((x, y, x + DOT_WIDTH, y + DOT_WIDTH), fill=BLACK, outline=BLACK)
             draw.text(
-                place_label(self.points[(i - 1) % len(self.points)], (x, y), self.points[(i + 1) % len(self.points)], RADIUS_LABEL),
+                place_label(self.points[(i - 1) % len(self.points)][0:2],
+                            (x, y),
+                            self.points[(i + 1) % len(self.points)][0:2],
+                            RADIUS_LABEL),
                 str(i + 1),
                 fill=BLACK,
                 font=font)
@@ -162,12 +171,12 @@ class App:
         else:
             print("Error : unknown mode")
 
+    @update_labels
     def add_dot(self, x: float, y: float):
         tag = f"dot-{self.i_tag}"
         self.i_tag += 1
         self.points.append((x, y, tag))
         self.create_dot(x, y, tag)
-        self.create_label_with_check(x, y, len(self.points))
 
     def edit_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
