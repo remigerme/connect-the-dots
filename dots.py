@@ -91,11 +91,14 @@ class App:
 
     def create_label(self, i: int, color=BLACK):
         n = len(self.points)
+        (x_, y_) = self.points[i][0:2]
+        x_ += DOT_WIDTH / 2
+        y_ += DOT_WIDTH / 2
         (x, y) = place_label(
             self.points[(i - 1) % n][0:2],
-            self.points[i][0:2],
+            (x_, y_),
             self.points[(i + 1) % n][0:2],
-            RADIUS_LABEL
+            RADIUS_LABEL_TKINTER
         )
         self.draw_label(x, y, i + 1, color)
 
@@ -152,7 +155,7 @@ class App:
                 place_label(self.points[(i - 1) % len(self.points)][0:2],
                             (x, y),
                             self.points[(i + 1) % len(self.points)][0:2],
-                            RADIUS_LABEL),
+                            RADIUS_LABEL_PIL),
                 str(i + 1),
                 fill=BLACK,
                 font=font)
