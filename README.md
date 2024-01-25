@@ -10,13 +10,6 @@ To use the program, you need to clone this repository and then install the pytho
 
 Start the program with `python dots.py /path/to/my/background.png`.
 
-There are three modes :
-- "add" mode : this is the default mode, a new point is created on click
-- "delete" mode : click on existing point to suppress it, press `Esc` to toggle
-- "edit" mode : not working for now, press `Space`.
-
-You can :
-- press `i` to toggle the background picture
-- press `n` to toggle the labels of points
+Check the `help` window for keyboard bindings and use of the software.
 
 By Rémi Germe.
