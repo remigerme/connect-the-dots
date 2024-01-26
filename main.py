@@ -156,7 +156,7 @@ class App:
 
     def edit_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
-        (x_, y_, _) = self.points[n]
+        (x_, y_, _) = self.dots[n]
         if (x - x_) ** 2 + (y - y_) ** 2 < (4 * DOT_WIDTH) ** 2:
             self.toggle_select(n)
 
@@ -165,7 +165,7 @@ class App:
             return (x - x_) ** 2 + (y - y_) ** 2
         n = 0
         d_min = 10e9
-        for (i, (x_, y_, _)) in enumerate(self.points):
+        for (i, (x_, y_, _)) in enumerate(self.dots):
             if d(x_, y_) < d_min:
                 n = i
                 d_min = d(x_, y_)
@@ -198,8 +198,10 @@ class App:
             bg = rgb_to_hex_string(rgb_color)
         )
     
-    def apply_update_labels(self):
+    def apply_update_dots(self):
         n = len(self.dots)
+        for dot in self.dots:
+            dot.erase(self.canvas)
         for (i, dot) in enumerate(self.dots):
             dot.draw(
                 self.canvas,
