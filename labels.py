@@ -4,14 +4,14 @@ from typing import Optional
 from points import Point, add, mul, norm
 
 
-class LabelMode(Enum):
+class DotLabelMode(Enum):
     AUTO = 1
     MANUAL = 2
 
-class Label:
+class DotLabel:
     def __init__(
             self,
-            mode: LabelMode = LabelMode.AUTO,
+            mode: DotLabelMode = DotLabelMode.AUTO,
             x: Optional[float] = None,
             y: Optional[float] = None):
         self.mode = mode
@@ -19,19 +19,19 @@ class Label:
         self.y = y
     
     def set_manually_to(self, x: float, y: float):
-        self.mode = LabelMode.MANUAL
+        self.mode = DotLabelMode.MANUAL
         self.x = x
         self.y = y
 
     def set_auto(self):
-        self.mode = LabelMode.AUTO
+        self.mode = DotLabelMode.AUTO
         self.x = None
         self.y = None
 
     def get_position(self, a: Point, b: Point, c: Point, radius: float) -> Point:
-        if self.mode == LabelMode.MANUAL:
+        if self.mode == DotLabelMode.MANUAL:
             return (self.x, self.y)
-        return Label.place_label(a, b, c, radius)
+        return DotLabel.place_label(a, b, c, radius)
     
     @staticmethod
     def place_label_auto(a: Point, b: Point, c: Point, radius: float) -> Point:
