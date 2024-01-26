@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dotlabel import DotLabel
 
 class Dot:
@@ -20,11 +22,11 @@ class Dot:
              width: float,
              dot_color: str,
              label_status: bool,
-             before: "Dot",
-             after: "Dot",
-             label_radius: float,
-             i: int,
-             label_color: str):
+             before: Optional["Dot"],
+             after: Optional["Dot"],
+             label_radius: Optional[float],
+             i: Optional[int],
+             label_color: Optional[str]):
         canvas.create_oval(
             self.x - width / 2,
             self.y - width / 2,
@@ -42,3 +44,26 @@ class Dot:
     def erase(self, canvas):
         canvas.delete(self.tag)
         self.label.erase(canvas)
+
+    def update(self,
+             canvas,
+             width: float,
+             dot_color: str,
+             label_status: bool,
+             before: Optional["Dot"],
+             after: Optional["Dot"],
+             label_radius: Optional[float],
+             i: Optional[int],
+             label_color: Optional[str]):
+        self.erase(canvas)
+        self.draw(
+            canvas,
+            width,
+            dot_color,
+            label_status,
+            before,
+            after,
+            label_radius,
+            i,
+            label_color
+        )
