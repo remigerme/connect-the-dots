@@ -56,6 +56,7 @@ class Dot:
              i: Optional[int],
              label_color: Optional[str]):
         self.erase(canvas)
+        self.label.erase(canvas)
         self.draw(
             canvas,
             width,

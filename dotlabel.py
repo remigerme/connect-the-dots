@@ -35,7 +35,7 @@ class DotLabel:
     def get_position(self, a: Point, b: Point, c: Point, radius: float) -> Point:
         if self.mode == DotLabelMode.MANUAL:
             return (self.x, self.y)
-        return DotLabel.place_label(a, b, c, radius)
+        return DotLabel.place_label_auto(a, b, c, radius)
     
     @staticmethod
     def place_label_auto(a: Point, b: Point, c: Point, radius: float) -> Point:
@@ -54,11 +54,15 @@ class DotLabel:
             *self.get_position(a, b, c, radius),
             text=text,
             fill=color,
-            tag=(DotLabel.SHARED_TAG, self.tag)
+            tag=(DotLabel.SHARED_TAG, self.personal_tag)
         )
 
     def erase(self, canvas):
         canvas.delete(self.personal_tag)
+    
+    def update(self, canvas, a: Point, b: Point, c: Point, radius: float, text: str, color: str):
+        self.erase(canvas)
+        self.draw(canvas, a, b, c, radius, text, color)
 
     @staticmethod
     def erase_all(canvas):
