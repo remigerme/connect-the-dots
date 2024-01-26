@@ -15,17 +15,3 @@ def random_point_on_circle(center: Point, radius: float) -> Point:
     x = center[0] + radius * cos(angle)
     y = center[1] + radius * sin(angle)
     return (x, y)
-
-def place_label(
-        a: Point,
-        b: Point,
-        c: Point,
-        radius: float) -> Point:
-    epsilon = 1e-5 # magic trick to handle first and colinear points
-    ab = add(b, mul(a, -1))
-    ab = mul(ab, 1 / (norm(ab) + epsilon))
-    cb = add(b, mul(c, -1))
-    cb = mul(cb, 1 / (norm(cb) + epsilon))
-    v = add(ab, cb)
-    v = mul(v, radius / (norm(v) + epsilon))
-    return add(b, v)
