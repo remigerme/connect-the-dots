@@ -9,6 +9,9 @@ class DotLabelMode(Enum):
     MANUAL = 2
 
 class DotLabel:
+
+    SHARED_TAG = "label"
+
     def __init__(
             self,
             mode: DotLabelMode = DotLabelMode.AUTO,
@@ -17,6 +20,7 @@ class DotLabel:
         self.mode = mode
         self.x = x
         self.y = y
+        self.personal_tag = ""
     
     def set_manually_to(self, x: float, y: float):
         self.mode = DotLabelMode.MANUAL
@@ -43,3 +47,19 @@ class DotLabel:
         v = add(ab, cb)
         v = mul(v, radius / (norm(v) + epsilon))
         return add(b, v)
+
+    def draw(self, canvas, a: Point, b: Point, c: Point, radius: float, text: str, color: str):
+        self.personal_tag = f"label-{text}"
+        canvas.create_text(
+            *self.get_position(a, b, c, radius),
+            text=text,
+            fill=color,
+            tag=(DotLabel.SHARED_TAG, self.tag)
+        )
+
+    def erase(self, canvas):
+        canvas.delete(self.personal_tag)
+
+    @staticmethod
+    def erase_all(canvas):
+        canvas.delete(DotLabel.SHARED_TAG)
