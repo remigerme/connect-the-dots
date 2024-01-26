@@ -130,8 +130,9 @@ class App:
             n = len(self.dots)
             a = self.dots[(i - 1) % n]
             c = self.dots[(i + 1) % n]
+            (x, y) = dot.label.get_position((a.x, a.y), (dot.x, dot.y), (c.x, c.y), LABEL_RADIUS_PIL)
             draw.text(
-                dot.label.get_position((a.x, a.y), (dot.x, dot.y), (c.x, c.y), LABEL_RADIUS_PIL),
+                (x - LABEL_CORRECTOR_PIL, y - LABEL_CORRECTOR_PIL),
                 str(i + 1),
                 fill=BLACK,
                 font=font)
