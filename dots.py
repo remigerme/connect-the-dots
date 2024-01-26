@@ -3,10 +3,10 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 from tkinter import Tk, Canvas, Label, Button, Toplevel, simpledialog
 
 from constants import *
-from utils import rgb_to_hex_string, place_label
+from dot import Dot
+from utils import rgb_to_hex_string
 
 # Decorators used to update various things
-
 def update_mode_label(func):
     def wrapper(self, *args, **kwargs):
         result = func(self, *args, **kwargs)
@@ -43,11 +43,10 @@ class App:
             im.save(self.filename)
             self.img = im
 
-        self.points = []
-        self.selected = set()
-        self.status_labels = True
+        self.dots: list[Dot] = []
+        self.selected: set[Dot] = set()
+        self.labels_status = True
         self.mode = AppMode.ADD
-        self.i_tag = 0
 
         # Help panel
         self.help_button = Button(self.root, text="Aide", command=self.show_help_window)
@@ -95,9 +94,6 @@ class App:
             self.mode = AppMode.ADD
         else:
             self.mode = AppMode.DEL
-    
-    def create_dot(self, x: float, y: float, tag: str, color=BLACK):
-        self.canvas.create_oval(x, y, x + DOT_WIDTH, y + DOT_WIDTH, fill=rgb_to_hex_string(color), tag=tag)
 
     def create_label(self, i: int, color=BLACK):
         n = len(self.points)
@@ -111,10 +107,6 @@ class App:
             RADIUS_LABEL_TKINTER
         )
         self.draw_label(x, y, i + 1, color)
-
-    def draw_label(self, x: float, y: float, i: int, color=BLACK):
-        tag = ("label", f"label-{i}")
-        self.canvas.create_text(x, y, text=f"{i}", fill=rgb_to_hex_string(color), tag=tag)
 
     def show_labels(self):
         self.canvas.delete("label")
@@ -142,7 +134,7 @@ class App:
     
     @update_labels
     def toggle_labels(self, event):
-        self.status_labels = not self.status_labels
+        self.labels_status = not self.labels_status
     
     def toggle_select(self, i: int):
         (x, y, tag) = self.points[i]
@@ -186,10 +178,19 @@ class App:
 
     @update_labels
     def add_dot(self, x: float, y: float):
-        tag = f"dot-{self.i_tag}"
-        self.i_tag += 1
-        self.points.append((x, y, tag))
-        self.create_dot(x, y, tag)
+        dot = Dot(x, y)
+        self.dots.append(dot)
+        dot.draw(
+            self.canvas,
+            DOT_WIDTH,
+            rgb_to_hex_string(BLACK),
+            self.labels_status,
+            self.dots[-2],
+            self.dots[0],
+            LABEL_RADIUS_TKINTER,
+            len(self.dots),
+            rgb_to_hex_string(BLACK)
+        )
 
     def edit_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
@@ -238,7 +239,7 @@ class App:
     
     def apply_update_labels(self):
         self.canvas.delete("label")
-        if self.status_labels:
+        if self.labels_status:
             self.show_labels()
 
 def main():
