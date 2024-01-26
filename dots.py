@@ -14,10 +14,10 @@ def update_mode_label(func):
         return result
     return wrapper
 
-def update_labels(func):
+def update_dots(func):
     def wrapper(self, *args, **kwargs):
         result = func(self, *args, **kwargs)
-        self.apply_update_labels()
+        self.apply_update_dots()
         return result
     return wrapper
 
@@ -95,55 +95,23 @@ class App:
         else:
             self.mode = AppMode.DEL
 
-    def create_label(self, i: int, color=BLACK):
-        n = len(self.points)
-        (x_, y_) = self.points[i][0:2]
-        x_ += DOT_WIDTH / 2
-        y_ += DOT_WIDTH / 2
-        (x, y) = place_label(
-            self.points[(i - 1) % n][0:2],
-            (x_, y_),
-            self.points[(i + 1) % n][0:2],
-            RADIUS_LABEL_TKINTER
-        )
-        self.draw_label(x, y, i + 1, color)
-
-    def show_labels(self):
-        self.canvas.delete("label")
-        for i in range(len(self.points)):
-            self.create_label(i)
-
-    def clear_dots(self):
-        for (_, _, tag) in self.points:
-            self.canvas.delete(tag)
-    
-    def redraw_dots(self):
-        self.clear_dots() # do it first to avoid concurrential changes
-        for (i, (x, y, tag)) in enumerate(self.points):
-            color = BLUE if i in self.selected else BLACK
-            self.create_dot(x, y, tag, color)
-
-    @update_labels
+    @update_dots
     def toggle_image(self, event):
         if self.status_bg_img:
             self.canvas.delete("bg_img")
         else:
             self.canvas.create_image(self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img")
-            self.redraw_dots()
         self.status_bg_img = not self.status_bg_img
     
-    @update_labels
+    @update_dots
     def toggle_labels(self, event):
         self.labels_status = not self.labels_status
     
+    @update_dots
     def toggle_select(self, i: int):
-        (x, y, tag) = self.points[i]
-        self.canvas.delete(tag)
         if i in self.selected:
-            self.create_dot(x, y, tag)
             self.selected.remove(i)
         else:
-            self.create_dot(x, y, tag, BLUE)
             self.selected.add(i)
 
     def save_image(self, event):
@@ -151,13 +119,19 @@ class App:
         draw = ImageDraw.Draw(im)
         font = ImageFont.truetype(r"arial.ttf", FONT_SIZE)
         # Draw points
-        for (i, (x, y, _)) in enumerate(self.points):
-            draw.ellipse((x, y, x + DOT_WIDTH, y + DOT_WIDTH), fill=BLACK, outline=BLACK)
+        for (i, dot) in enumerate(self.dots):
+            draw.ellipse(
+                (dot.x - DOT_WIDTH / 2,
+                 dot.y - DOT_WIDTH / 2,
+                 dot.x + DOT_WIDTH / 2,
+                 dot.y + DOT_WIDTH / 2),
+                fill=BLACK,
+                outline=BLACK)
+            n = len(self.dots)
+            a = self.dots[(i - 1) % n]
+            c = self.dots[(i + 1) % n]
             draw.text(
-                place_label(self.points[(i - 1) % len(self.points)][0:2],
-                            (x + DOT_WIDTH / 2, y + DOT_WIDTH / 2),
-                            self.points[(i + 1) % len(self.points)][0:2],
-                            RADIUS_LABEL_PIL),
+                dot.label.get_position((a.x, a.y), (dot.x, dot.y), (c.x, c.y), LABEL_RADIUS_PIL),
                 str(i + 1),
                 fill=BLACK,
                 font=font)
@@ -176,21 +150,9 @@ class App:
         else:
             print("Error : unknown mode")
 
-    @update_labels
+    @update_dots
     def add_dot(self, x: float, y: float):
-        dot = Dot(x, y)
-        self.dots.append(dot)
-        dot.draw(
-            self.canvas,
-            DOT_WIDTH,
-            rgb_to_hex_string(BLACK),
-            self.labels_status,
-            self.dots[-2],
-            self.dots[0],
-            LABEL_RADIUS_TKINTER,
-            len(self.dots),
-            rgb_to_hex_string(BLACK)
-        )
+        self.dots.append(Dot(x, y))
 
     def edit_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
@@ -209,15 +171,15 @@ class App:
                 d_min = d(x_, y_)
         return n
 
-    @update_labels
+    @update_dots
     def remove_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
-        (x_, y_, _) = self.points[n]
-        if (x - x_) ** 2 + (y - y_) ** 2 < (4 * DOT_WIDTH) ** 2:
-            (_, _, tag) = self.points.pop(n)
-            self.canvas.delete(tag)
-    
-    @update_labels
+        dot = self.dots[n]
+        if (x - self.dot.x) ** 2 + (y - self.dot.y) ** 2 < (4 * DOT_WIDTH) ** 2:
+            dot.erase()
+            self.dots.pop(n)
+
+    @update_dots
     def renumber(self, event):
         if len(self.selected) == 0:
             raise Exception("Select a point to renumber.")
@@ -227,8 +189,7 @@ class App:
         new_n = simpledialog.askinteger("Renumérotation", "Nouveau numéro : ")
         if new_n is not None and 1 <= new_n <= len(self.points):
             self.selected.remove(n)
-            self.points.insert(new_n - 1, self.points.pop(n))
-            self.redraw_dots()
+            self.dots.insert(new_n - 1, self.dots.pop(n))
 
     def apply_update_mode_label(self):
         (text, rgb_color) = MODE_LABEL_INFO[self.mode]
@@ -238,9 +199,20 @@ class App:
         )
     
     def apply_update_labels(self):
-        self.canvas.delete("label")
-        if self.labels_status:
-            self.show_labels()
+        n = len(self.dots)
+        for (i, dot) in enumerate(self.dots):
+            dot.draw(
+                self.canvas,
+                DOT_WIDTH,
+                rgb_to_hex_string(BLUE if i in self.selected else BLACK),
+                self.labels_status,
+                self.dots[(i - 1) % n],
+                self.dots[(i + 1) % n],
+                LABEL_RADIUS_TKINTER,
+                i + 1,
+                rgb_to_hex_string(BLACK)
+            )
+
 
 def main():
     args = sys.argv[1:]
