@@ -78,26 +78,34 @@ class App:
         self.root.bind("<B1-Motion>", self.drag_on_drag)
         self.root.bind("<ButtonRelease-1>", self.drag_on_drop)
         self.currently_selected_label = None
-    
+        self.initial_mouse_position = None
+        self.initial_label_position = None
+
     def run(self):
         self.root.mainloop()
 
     def drag_on_start(self, event):
         if self.mode == AppMode.EDIT:
             n = self.find_closest_label(event.x, event.y)
-            dot = self.dots[n]
-            if (event.x - dot.x) ** 2 + (y - dot.y) ** 2 < (4 * DOT_WIDTH) ** 2:
-                self.toggle_select(n)
+            (lx, ly) = self.get_label_position(n)
+            if (event.x - lx) ** 2 + (event.y - ly) ** 2 < (4 * DOT_WIDTH) ** 2:
+                self.currently_selected_label = n
+                self.initial_mouse_position = (event.x, event.y)
+                self.initial_label_position = (lx, ly)
 
-            self.currently_selected_label = ...
-
+    @update_dots
     def drag_on_drag(self, event):
         if self.mode == AppMode.EDIT and self.currently_selected_label is not None:
-            ...
+            x = self.initial_label_position[0] + event.x - self.initial_mouse_position[0]
+            y = self.initial_label_position[1] + event.y - self.initial_mouse_position[1]
+            self.dots[self.currently_selected_label].label.set_manually_to(x, y)
 
+    @update_dots
     def drag_on_drop(self, event):
         if self.mode == AppMode.EDIT and self.currently_selected_label is not None:
-            ...
+            x = self.initial_label_position[0] + event.x - self.initial_mouse_position[0]
+            y = self.initial_label_position[1] + event.y - self.initial_mouse_position[1]
+            self.dots[self.currently_selected_label].label.set_manually_to(x, y)
             self.currently_selected_label = None
 
     def show_help_window(self):
@@ -213,9 +221,9 @@ class App:
         n = 0
         d_min = 10e9
         for i in range(len(self.dots)):
-            if d(self.get_label_position(i)) < d_min:
+            if d(*self.get_label_position(i)) < d_min:
                 n = i
-                d_min = d(self.get_label_position(i))
+                d_min = d(*self.get_label_position(i))
         return n
 
     @update_dots
