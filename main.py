@@ -132,9 +132,10 @@ class App:
             c = self.dots[(i + 1) % n]
             (x, y) = dot.label.get_position((a.x, a.y), (dot.x, dot.y), (c.x, c.y), LABEL_RADIUS_PIL)
             draw.text(
-                (x - LABEL_CORRECTOR_PIL, y - LABEL_CORRECTOR_PIL),
+                (x, y),
                 str(i + 1),
                 fill=BLACK,
+                anchor="mm",
                 font=font)
         im.save(f"connect-the-dots-{self.filename}")
 
