@@ -8,7 +8,7 @@ To use the program, you need to clone this repository and then install the pytho
 ## Use
 **Make sure you activated your virtual environment** (if you used one) before using the program.
 
-Start the program with `python dots.py /path/to/my/background.png`.
+Start the program with `python main.py /path/to/my/background.png`.
 
 Check the `help` window for keyboard bindings and use of the software.
 
