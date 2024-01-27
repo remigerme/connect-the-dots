@@ -77,18 +77,28 @@ class App:
         self.root.bind("<ButtonPress-1>", self.drag_on_start)
         self.root.bind("<B1-Motion>", self.drag_on_drag)
         self.root.bind("<ButtonRelease-1>", self.drag_on_drop)
+        self.currently_selected_label = None
     
     def run(self):
         self.root.mainloop()
 
     def drag_on_start(self, event):
-        ...
+        if self.mode == AppMode.EDIT:
+            n = self.find_closest_label(event.x, event.y)
+            dot = self.dots[n]
+            if (event.x - dot.x) ** 2 + (y - dot.y) ** 2 < (4 * DOT_WIDTH) ** 2:
+                self.toggle_select(n)
+
+            self.currently_selected_label = ...
 
     def drag_on_drag(self, event):
-        ...
-    
+        if self.mode == AppMode.EDIT and self.currently_selected_label is not None:
+            ...
+
     def drag_on_drop(self, event):
-        ...
+        if self.mode == AppMode.EDIT and self.currently_selected_label is not None:
+            ...
+            self.currently_selected_label = None
 
     def show_help_window(self):
         top = Toplevel()
@@ -128,6 +138,15 @@ class App:
             self.selected.remove(i)
         else:
             self.selected.add(i)
+    
+    def get_label_position(self, i: int) -> tuple[float, float]:
+        m = len(self.dots)
+        a = self.dots[(i - 1) % m]
+        a = (a.x, a.y)
+        b = (self.dots[i].x, self.dots[i].y)
+        c = self.dots[(i + 1) % m]
+        c = (c.x, c.y)
+        return self.dots[i].label.get_position(a, b, c, LABEL_RADIUS)
 
     def save_image(self, event):
         im = Image.new(mode="RGB", size=(self.W, self.H), color=WHITE)
@@ -145,7 +164,7 @@ class App:
             n = len(self.dots)
             a = self.dots[(i - 1) % n]
             c = self.dots[(i + 1) % n]
-            (x, y) = dot.label.get_position((a.x, a.y), (dot.x, dot.y), (c.x, c.y), LABEL_RADIUS_PIL)
+            (x, y) = dot.label.get_position((a.x, a.y), (dot.x, dot.y), (c.x, c.y), LABEL_RADIUS)
             draw.text(
                 (x, y),
                 str(i + 1),
@@ -187,6 +206,17 @@ class App:
                 n = i
                 d_min = d(dot.x, dot.y)
         return n
+    
+    def find_closest_label(self, x: float, y: float) -> int:
+        def d(x_, y_):
+            return (x - x_) ** 2 + (y - y_) ** 2
+        n = 0
+        d_min = 10e9
+        for i in range(len(self.dots)):
+            if d(self.get_label_position(i)) < d_min:
+                n = i
+                d_min = d(self.get_label_position(i))
+        return n
 
     @update_dots
     def remove_dot(self, x: float, y: float):
@@ -227,7 +257,7 @@ class App:
                 self.labels_status,
                 self.dots[(i - 1) % n],
                 self.dots[(i + 1) % n],
-                LABEL_RADIUS_TKINTER,
+                LABEL_RADIUS,
                 i + 1,
                 rgb_to_hex_string(BLACK)
             )
