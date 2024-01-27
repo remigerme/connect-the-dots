@@ -5,6 +5,7 @@ from tkinter import Tk, Canvas, Label, Button, Toplevel, simpledialog
 from constants import *
 from dot import Dot
 from utils import rgb_to_hex_string
+from dragmanager import DragManager
 
 # Decorators used to update various things
 def update_mode_label(func):
@@ -71,9 +72,23 @@ class App:
         self.root.bind("<KeyPress-n>", self.toggle_labels)
         self.root.bind("<KeyPress-s>", self.save_image)
         self.root.bind("<KeyPress-r>", self.renumber)
+
+        # Drag and drop
+        self.root.bind("<ButtonPress-1>", self.drag_on_start)
+        self.root.bind("<B1-Motion>", self.drag_on_drag)
+        self.root.bind("<ButtonRelease-1>", self.drag_on_drop)
     
     def run(self):
         self.root.mainloop()
+
+    def drag_on_start(self, event):
+        ...
+
+    def drag_on_drag(self, event):
+        ...
+    
+    def drag_on_drop(self, event):
+        ...
 
     def show_help_window(self):
         top = Toplevel()
@@ -167,10 +182,10 @@ class App:
             return (x - x_) ** 2 + (y - y_) ** 2
         n = 0
         d_min = 10e9
-        for (i, (x_, y_, _)) in enumerate(self.dots):
-            if d(x_, y_) < d_min:
+        for (i, dot) in enumerate(self.dots):
+            if d(dot.x, dot.y) < d_min:
                 n = i
-                d_min = d(x_, y_)
+                d_min = d(dot.x, dot.y)
         return n
 
     @update_dots
