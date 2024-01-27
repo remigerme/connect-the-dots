@@ -5,7 +5,6 @@ from tkinter import Tk, Canvas, Label, Button, Toplevel, simpledialog
 from constants import *
 from dot import Dot
 from utils import rgb_to_hex_string
-from dragmanager import DragManager
 
 # Decorators used to update various things
 def update_mode_label(func):
@@ -242,7 +241,7 @@ class App:
             raise Exception("Can't renumber multiple points at once.")
         n = list(self.selected)[0]
         new_n = simpledialog.askinteger("Renumérotation", "Nouveau numéro : ")
-        if new_n is not None and 1 <= new_n <= len(self.points):
+        if new_n is not None and 1 <= new_n <= len(self.dots):
             self.selected.remove(n)
             self.dots.insert(new_n - 1, self.dots.pop(n))
 
