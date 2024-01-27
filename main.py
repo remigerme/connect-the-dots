@@ -46,6 +46,7 @@ class App:
         self.dots: list[Dot] = []
         self.selected: set[Dot] = set()
         self.labels_status = True
+        self.links_status = False
         self.mode = AppMode.ADD
 
         # Help panel
@@ -71,6 +72,7 @@ class App:
         self.root.bind("<KeyPress-n>", self.toggle_labels)
         self.root.bind("<KeyPress-s>", self.save_image)
         self.root.bind("<KeyPress-r>", self.renumber)
+        self.root.bind("<KeyPress-t>", self.toggle_links)
 
         # Drag and drop
         self.root.bind("<ButtonPress-1>", self.drag_on_start)
@@ -145,6 +147,10 @@ class App:
             self.selected.remove(i)
         else:
             self.selected.add(i)
+    
+    @update_dots
+    def toggle_links(self, event):
+        self.links_status = not self.links_status
     
     def get_label_position(self, i: int) -> tuple[float, float]:
         m = len(self.dots)
@@ -256,6 +262,8 @@ class App:
         n = len(self.dots)
         for dot in self.dots:
             dot.erase(self.canvas)
+        if not self.links_status:
+            self.canvas.delete("links")
         for (i, dot) in enumerate(self.dots):
             dot.draw(
                 self.canvas,
@@ -266,8 +274,16 @@ class App:
                 self.dots[(i + 1) % n],
                 LABEL_RADIUS,
                 i + 1,
-                rgb_to_hex_string(BLACK)
-            )
+                rgb_to_hex_string(BLACK))
+            if i >= 1 and self.links_status:
+                self.canvas.create_line(
+                    self.dots[i - 1].x,
+                    self.dots[i - 1].y,
+                    dot.x,
+                    dot.y,
+                    fill=rgb_to_hex_string(BLACK),
+                    tag="links"
+                )
 
 
 def main():
