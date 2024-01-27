@@ -173,8 +173,8 @@ class App:
 
     def edit_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
-        (x_, y_, _) = self.dots[n]
-        if (x - x_) ** 2 + (y - y_) ** 2 < (4 * DOT_WIDTH) ** 2:
+        dot = self.dots[n]
+        if (x -dot.x) ** 2 + (y - dot.y) ** 2 < (4 * DOT_WIDTH) ** 2:
             self.toggle_select(n)
 
     def find_closest_dot(self, x: float, y: float) -> int:
@@ -192,8 +192,8 @@ class App:
     def remove_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
         dot = self.dots[n]
-        if (x - self.dot.x) ** 2 + (y - self.dot.y) ** 2 < (4 * DOT_WIDTH) ** 2:
-            dot.erase()
+        if (x - dot.x) ** 2 + (y - dot.y) ** 2 < (4 * DOT_WIDTH) ** 2:
+            dot.erase(self.canvas)
             self.dots.pop(n)
 
     @update_dots
