@@ -8,7 +8,8 @@ HELP = [
     "<esc> pour A/D mode suppression",
     "<i> pour A/D l'image d'arrière-plan",
     "<n> pour A/D les labels des points",
-    "<s> pour enregistrer l'image des points à relier générée"
+    "<s> pour enregistrer l'image des points à relier générée",
+    "<t> pour A/D les traits entre les points"
 ]
 
 RGBColor = tuple[int, int, int]
