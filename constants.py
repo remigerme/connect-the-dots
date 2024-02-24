@@ -15,8 +15,8 @@ HELP = [
 RGBColor = tuple[int, int, int]
 
 DOT_WIDTH = 8
-LABEL_RADIUS = 15
-FONT_SIZE = 15
+LABEL_RADIUS = 12
+FONT_SIZE = 10
 MARGIN_UP_WINDOW = 5
 BLACK: RGBColor = (0, 0, 0)
 RED: RGBColor = (255, 0, 0)
