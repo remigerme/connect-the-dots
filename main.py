@@ -6,19 +6,23 @@ from constants import *
 from dot import Dot
 from utils import rgb_to_hex_string
 
+
 # Decorators used to update various things
 def update_mode_label(func):
     def wrapper(self, *args, **kwargs):
         result = func(self, *args, **kwargs)
         self.apply_update_mode_label()
         return result
+
     return wrapper
+
 
 def update_dots(func):
     def wrapper(self, *args, **kwargs):
         result = func(self, *args, **kwargs)
         self.apply_update_dots()
         return result
+
     return wrapper
 
 
@@ -27,7 +31,7 @@ class App:
     @update_mode_label
     def __init__(self, filename):
         self.root = Tk()
-    
+
         def compute_size(W: int, H: int):
             sw = self.root.winfo_screenwidth()
             sh = self.root.winfo_screenheight()
@@ -61,10 +65,12 @@ class App:
         self.canvas = Canvas(self.root, width=self.W, height=self.H)
         self.canvas.grid(columnspan=2)
         self.tk_img = ImageTk.PhotoImage(file=self.filename)
-        self.canvas.create_image(self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img")
+        self.canvas.create_image(
+            self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img"
+        )
         self.status_bg_img = True
 
-        #Bindings 
+        # Bindings
         self.canvas.bind("<Button-1>", self.handle_dot)
         self.root.bind("<space>", self.toggle_edit_mode)
         self.root.bind("<Escape>", self.toggle_del_mode)
@@ -97,15 +103,31 @@ class App:
     @update_dots
     def drag_on_drag(self, event):
         if self.mode == AppMode.EDIT and self.currently_selected_label is not None:
-            x = self.initial_label_position[0] + event.x - self.initial_mouse_position[0]
-            y = self.initial_label_position[1] + event.y - self.initial_mouse_position[1]
+            x = (
+                self.initial_label_position[0]
+                + event.x
+                - self.initial_mouse_position[0]
+            )
+            y = (
+                self.initial_label_position[1]
+                + event.y
+                - self.initial_mouse_position[1]
+            )
             self.dots[self.currently_selected_label].label.set_manually_to(x, y)
 
     @update_dots
     def drag_on_drop(self, event):
         if self.mode == AppMode.EDIT and self.currently_selected_label is not None:
-            x = self.initial_label_position[0] + event.x - self.initial_mouse_position[0]
-            y = self.initial_label_position[1] + event.y - self.initial_mouse_position[1]
+            x = (
+                self.initial_label_position[0]
+                + event.x
+                - self.initial_mouse_position[0]
+            )
+            y = (
+                self.initial_label_position[1]
+                + event.y
+                - self.initial_mouse_position[1]
+            )
             self.dots[self.currently_selected_label].label.set_manually_to(x, y)
             self.currently_selected_label = None
 
@@ -121,7 +143,7 @@ class App:
             self.mode = AppMode.ADD
         else:
             self.mode = AppMode.EDIT
-    
+
     @update_mode_label
     def toggle_del_mode(self, event):
         if self.mode == AppMode.DEL:
@@ -134,24 +156,26 @@ class App:
         if self.status_bg_img:
             self.canvas.delete("bg_img")
         else:
-            self.canvas.create_image(self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img")
+            self.canvas.create_image(
+                self.W / 2, self.H / 2, image=self.tk_img, tag="bg_img"
+            )
         self.status_bg_img = not self.status_bg_img
-    
+
     @update_dots
     def toggle_labels(self, event):
         self.labels_status = not self.labels_status
-    
+
     @update_dots
     def toggle_select(self, i: int):
         if i in self.selected:
             self.selected.remove(i)
         else:
             self.selected.add(i)
-    
+
     @update_dots
     def toggle_links(self, event):
         self.links_status = not self.links_status
-    
+
     def get_label_position(self, i: int) -> tuple[float, float]:
         m = len(self.dots)
         a = self.dots[(i - 1) % m]
@@ -166,24 +190,24 @@ class App:
         draw = ImageDraw.Draw(im)
         font = ImageFont.truetype(r"arial.ttf", FONT_SIZE)
         # Draw points
-        for (i, dot) in enumerate(self.dots):
+        for i, dot in enumerate(self.dots):
             draw.ellipse(
-                (dot.x - DOT_WIDTH / 2,
-                 dot.y - DOT_WIDTH / 2,
-                 dot.x + DOT_WIDTH / 2,
-                 dot.y + DOT_WIDTH / 2),
+                (
+                    dot.x - DOT_WIDTH / 2,
+                    dot.y - DOT_WIDTH / 2,
+                    dot.x + DOT_WIDTH / 2,
+                    dot.y + DOT_WIDTH / 2,
+                ),
                 fill=BLACK,
-                outline=BLACK)
+                outline=BLACK,
+            )
             n = len(self.dots)
             a = self.dots[(i - 1) % n]
             c = self.dots[(i + 1) % n]
-            (x, y) = dot.label.get_position((a.x, a.y), (dot.x, dot.y), (c.x, c.y), LABEL_RADIUS)
-            draw.text(
-                (x, y),
-                str(i + 1),
-                fill=BLACK,
-                anchor="mm",
-                font=font)
+            (x, y) = dot.label.get_position(
+                (a.x, a.y), (dot.x, dot.y), (c.x, c.y), LABEL_RADIUS
+            )
+            draw.text((x, y), str(i + 1), fill=BLACK, anchor="mm", font=font)
         im.save(f"connect-the-dots-{self.filename}")
 
     def handle_dot(self, event):
@@ -206,23 +230,25 @@ class App:
     def edit_dot(self, x: float, y: float):
         n = self.find_closest_dot(x, y)
         dot = self.dots[n]
-        if (x -dot.x) ** 2 + (y - dot.y) ** 2 < (4 * DOT_WIDTH) ** 2:
+        if (x - dot.x) ** 2 + (y - dot.y) ** 2 < (4 * DOT_WIDTH) ** 2:
             self.toggle_select(n)
 
     def find_closest_dot(self, x: float, y: float) -> int:
         def d(x_, y_):
             return (x - x_) ** 2 + (y - y_) ** 2
+
         n = 0
         d_min = 10e9
-        for (i, dot) in enumerate(self.dots):
+        for i, dot in enumerate(self.dots):
             if d(dot.x, dot.y) < d_min:
                 n = i
                 d_min = d(dot.x, dot.y)
         return n
-    
+
     def find_closest_label(self, x: float, y: float) -> int:
         def d(x_, y_):
             return (x - x_) ** 2 + (y - y_) ** 2
+
         n = 0
         d_min = 10e9
         for i in range(len(self.dots)):
@@ -253,28 +279,26 @@ class App:
 
     def apply_update_mode_label(self):
         (text, rgb_color) = MODE_LABEL_INFO[self.mode]
-        self.mode_label.config(
-            text = text,
-            bg = rgb_to_hex_string(rgb_color)
-        )
-    
+        self.mode_label.config(text=text, bg=rgb_to_hex_string(rgb_color))
+
     def apply_update_dots(self):
         n = len(self.dots)
         for dot in self.dots:
             dot.erase(self.canvas)
         if not self.links_status:
             self.canvas.delete("links")
-        for (i, dot) in enumerate(self.dots):
+        for i, dot in enumerate(self.dots):
             dot.draw(
                 self.canvas,
                 DOT_WIDTH,
-                rgb_to_hex_string(BLUE if i in self.selected else BLACK),
+                rgb_to_hex_string(CYAN if i in self.selected else BLACK),
                 self.labels_status,
                 self.dots[(i - 1) % n],
                 self.dots[(i + 1) % n],
                 LABEL_RADIUS,
                 i + 1,
-                rgb_to_hex_string(BLACK))
+                rgb_to_hex_string(BLACK),
+            )
             if i >= 1 and self.links_status:
                 self.canvas.create_line(
                     self.dots[i - 1].x,
@@ -282,7 +306,7 @@ class App:
                     dot.x,
                     dot.y,
                     fill=rgb_to_hex_string(BLACK),
-                    tag="links"
+                    tag="links",
                 )
 
 
@@ -290,7 +314,7 @@ def main():
     args = sys.argv[1:]
     if len(args) == 0:
         raise Exception("Missing file in command line argument.")
-    
+
     filename = args[0]
     app = App(filename)
     app.run()
